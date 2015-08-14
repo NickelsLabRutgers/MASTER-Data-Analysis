@@ -129,7 +129,7 @@ int main(int argc, char * argv[])
       getline(fastq_file,pos);
       getline(fastq_file,qual);
       if(fastq_file.eof())
-	break;
+        break;
 
       total_reads++;
 
@@ -142,73 +142,73 @@ int main(int argc, char * argv[])
       begin_pos = bases.find(BEG_SEQ);
       if (begin_pos != -1 && begin_pos + 57 + key_len + tag_len <= bases.length() ) 
       {
-	mid_start = begin_pos + BEG_SEQ.length() + tag_len;
-	end_start = mid_start + MID_SEQ.length() + key_len;
-	key = bases.substr(mid_start + MID_SEQ.length(), key_len); //key
-	tag = bases.substr(begin_pos + BEG_SEQ.length(), tag_len + extra_pos); //tag
-	raw_key_set.insert(key);
-	raw_tag_set.insert(tag);
-	if (raw_key_count_map.find(key) == raw_key_count_map.end())
-	{
-	  raw_key_count_map[key] = 1;
-	}
-	else
-	{
-	  raw_key_count_map[key]++;
-	}
+        mid_start = begin_pos + BEG_SEQ.length() + tag_len;
+        end_start = mid_start + MID_SEQ.length() + key_len;
+        key = bases.substr(mid_start + MID_SEQ.length(), key_len); //key
+        tag = bases.substr(begin_pos + BEG_SEQ.length(), tag_len + extra_pos); //tag
+        raw_key_set.insert(key);
+        raw_tag_set.insert(tag);
+        if (raw_key_count_map.find(key) == raw_key_count_map.end())
+        {
+          raw_key_count_map[key] = 1;
+        }
+        else
+        {
+          raw_key_count_map[key]++;
+        }
 
-	if (raw_tag_count_map.find(tag) == raw_tag_count_map.end())
-	{
-	  raw_tag_count_map[tag] = 1;
-	}
-	else
-	{
-	  raw_tag_count_map[tag]++;
-	}
+        if (raw_tag_count_map.find(tag) == raw_tag_count_map.end())
+        {
+          raw_tag_count_map[tag] = 1;
+        }
+        else
+        {
+          raw_tag_count_map[tag]++;
+        }
       }
       else
       {
-	flag = 1;
-	begin_pos = 0;
-	mid_start = BEG_SEQ.length() + tag_len;
-	end_start = mid_start + MID_SEQ.length() + key_len;
+        flag = 1;
+        begin_pos = 0;
+        mid_start = BEG_SEQ.length() + tag_len;
+        end_start = mid_start + MID_SEQ.length() + key_len;
       }
 
       if (flag != 1) 
       {
-	for (int j = begin_pos; j < begin_pos + 57 + key_len + tag_len; j++)
-	{
-	  if((qual.at(j) < qual_min_char) || bases.at(j) == 'N')
-	  {
-	    flag = 1;
-	    break;
-	  }
-	}
-	if (MID_SEQ.substr(extra_pos, MID_SEQ.length() - extra_pos).compare(bases.substr(mid_start + extra_pos, MID_SEQ.length() - extra_pos)) != 0 || END_SEQ.compare(bases.substr(end_start, END_SEQ.length())) != 0)
-	{
-	  flag = 1;
-	}
+        for (int j = begin_pos; j < begin_pos + 57 + key_len + tag_len; j++)
+        {
+          if((qual.at(j) < qual_min_char) || bases.at(j) == 'N')
+          {
+            flag = 1;
+            break;
+          }
+        }
+        if (MID_SEQ.substr(extra_pos, MID_SEQ.length() - extra_pos).compare(bases.substr(mid_start + extra_pos, MID_SEQ.length() - extra_pos)) != 0 || END_SEQ.compare(bases.substr(end_start, END_SEQ.length())) != 0)
+        {
+          flag = 1;
+        }
       }
 
       if(flag != 1)
       {
-	if (parsed_map.find(key) != parsed_map.end())
-	{
-	  //parsed_map = {key: {tag:read_count} ... }
-	  if (parsed_map[key].find(tag) != parsed_map[key].end())
-	    parsed_map[key][tag]++;
-	  else
-	    parsed_map[key][tag] = 1;
-	}
-	else
-	{
-	  parsed_map[key][tag] = 1;
-	}
+        if (parsed_map.find(key) != parsed_map.end())
+        {
+          //parsed_map = {key: {tag:read_count} ... }
+          if (parsed_map[key].find(tag) != parsed_map[key].end())
+            parsed_map[key][tag]++;
+          else
+            parsed_map[key][tag] = 1;
+        }
+        else
+        {
+          parsed_map[key][tag] = 1;
+        }
       }
       else
       {
-	discard_file << bases << endl;
-	discard_reads++; //discard_reads include QC failed reads, multi mapping reads, and low count reads.
+        discard_file << bases << endl;
+        discard_reads++; //discard_reads include QC failed reads, multi mapping reads, and low count reads.
       }
     }
     fastq_file.close();
@@ -228,10 +228,10 @@ int main(int argc, char * argv[])
     {
       for (map<string, int>::iterator itn = (it->second).begin(); itn != (it->second).end(); itn++) 
       {
-	multi_tag_discarded_reads_diversity++;
-	multi_tag_discarded_reads_count += itn->second;
-	discard_reads += itn-> second;
-	discard_file << it->first << '\t' << (it->second).begin()->first << '\n';
+        multi_tag_discarded_reads_diversity++;
+        multi_tag_discarded_reads_count += itn->second;
+        discard_reads += itn-> second;
+        discard_file << it->first << '\t' << (it->second).begin()->first << '\n';
       }
     } 
     else if ( max_count < 10 ) 
@@ -243,25 +243,25 @@ int main(int argc, char * argv[])
     {
       for (map<string, int>::iterator itn = (it->second).begin(); itn != (it->second).end(); itn++) 
       {
-	//parsed_file << itn->second << "\t" << itn->first << endl;
-	if ((itn->second) == max_count)
-	{
-	  tag_map[itn->first][it->first] = itn->second;
-	  if (tag_map[itn->first].find("SUM") == tag_map[itn->first].end()) {
-	    tag_map[itn->first]["SUM"] = itn->second;
-	  } 
-	  else 
-	  {
-	    tag_map[itn->first]["SUM"] += itn->second;
-	  }
-	} 
-	else 
-	{
-	   multi_tag_discarded_reads_diversity++;
-	   multi_tag_discarded_reads_count += itn->second;
-	   discard_reads += itn-> second;
-	   discard_file << it->first << '\t' << (it->second).begin()->first << '\n';
-	}
+        //parsed_file << itn->second << "\t" << itn->first << endl;
+        if ((itn->second) == max_count)
+        {
+          tag_map[itn->first][it->first] = itn->second;
+          if (tag_map[itn->first].find("SUM") == tag_map[itn->first].end()) {
+            tag_map[itn->first]["SUM"] = itn->second;
+          } 
+          else 
+          {
+            tag_map[itn->first]["SUM"] += itn->second;
+          }
+        } 
+        else 
+        {
+           multi_tag_discarded_reads_diversity++;
+           multi_tag_discarded_reads_count += itn->second;
+           discard_reads += itn-> second;
+           discard_file << it->first << '\t' << (it->second).begin()->first << '\n';
+        }
       }
     }
   }
@@ -272,10 +272,10 @@ int main(int argc, char * argv[])
     {
       if (itn->first != "SUM") 
       {
-	parsed_file << (itn->first) << '\t' << (it->first) << '\t' << (itn->second) << '\n';
-	tag_sum << (it->first) << '\t' << (it->second)["SUM"] << '\n';
-	parsed_reads += (itn->second);
-	key_count++;
+        parsed_file << (itn->first) << '\t' << (it->first) << '\t' << (itn->second) << '\n';
+        tag_sum << (it->first) << '\t' << (it->second)["SUM"] << '\n';
+        parsed_reads += (itn->second);
+        key_count++;
       }
     }
     tag_count++;

@@ -126,71 +126,67 @@ int main(int argc, char * argv[])
       getline(fastq_file,pos);
       getline(fastq_file,qual);
       if(fastq_file.eof())
-	break;
+        break;
       total_reads++;
       flag = 0;
       mid_index = bases.find(MID_SEQ.substr(extra_pos, MID_SEQ.length() - extra_pos)) - extra_pos;
 
       if(mid_index < 0 || mid_index + 21 + key_len > bases.length() || mid_index - digital_tag_len + extra_pos < 1)
       {
-	c_fail++; //Size fails.
-	//q_fail++;
-	flag = 1;
+        c_fail++; //Size fails.
+        //q_fail++;
+        flag = 1;
       }
       else
       {
-	rna_key = bases.substr(mid_index + MID_SEQ.length(), key_len);
-	//cout << rna_key << endl;
-	rna_dig_tag = bases.substr(0, digital_tag_len);
-	rna_tag = bases.substr(digital_tag_len, mid_index - digital_tag_len + extra_pos);
-	raw_rna_tag_set.insert(rna_tag);
-	raw_rna_key_set.insert(rna_key);
-	raw_rna_digital_tag_set.insert(rna_dig_tag);
-	recovered_reads++;
-	for(int j = 0; j < (mid_index + key_len + 21); j++)
-	{
-	  if((qual.at(j) < qual_min_char) || bases.at(j) == 'N')
-	  {
-	    q_fail++; //Qual fails.
-	    flag = 1;
-	    break;
-	  }
-	}
+        rna_key = bases.substr(mid_index + MID_SEQ.length(), key_len);
+        //cout << rna_key << endl;
+        rna_dig_tag = bases.substr(0, digital_tag_len);
+        rna_tag = bases.substr(digital_tag_len, mid_index - digital_tag_len + extra_pos);
+        raw_rna_tag_set.insert(rna_tag);
+        raw_rna_key_set.insert(rna_key);
+        raw_rna_digital_tag_set.insert(rna_dig_tag);
+        recovered_reads++;
+        for(int j = 0; j < (mid_index + key_len + 21); j++)
+        {
+          if((qual.at(j) < qual_min_char) || bases.at(j) == 'N')
+          {
+            q_fail++; //Qual fails.
+            flag = 1;
+            break;
+          }
+        }
 
-	if (END_SEQ.compare(bases.substr(mid_index + key_len + 16, END_SEQ.length())) != 0)
-	{
-	  flag = 1;
-	  //if (flag != 1)
-	  //{
-	  //  q_fail++;
-	  //}
-	}
+        if (END_SEQ.compare(bases.substr(mid_index + key_len + 16, END_SEQ.length())) != 0)
+        {
+          flag = 1;
+        }
       }
 
       if(flag != 1)
       {
-	rna_map[rna_key][rna_tag].first++;
-	rna_map[rna_key][rna_tag].second.insert(rna_dig_tag);
-	if (dna_key_map.find(rna_key) != dna_key_map.end())
-	{
-	  //cout << rna_key << endl;
-	  rna_tag_map[dna_key_map[rna_key].first].insert(rna_key);
-	  rna_key_count_map[dna_key_map[rna_key].first]++;
-	  rna_digital_tag_key_count_map[rna_dig_tag]++;
-	  rna_digital_tag_key_div_map[rna_dig_tag].insert(rna_key);
-	  rna_good_key_set.insert(rna_key);
-	  good_reads_count++;
-	}
-	else
-	{
-	  no_dna_key_match++;
-	  no_dna_key_match_set.insert(rna_key);
-	}	  
-	parsed_reads++;
+        rna_map[rna_key][rna_tag].first++;
+        rna_map[rna_key][rna_tag].second.insert(rna_dig_tag);
+        if (dna_key_map.find(rna_key) != dna_key_map.end())
+        {
+          //cout << rna_key << endl;
+          rna_tag_map[dna_key_map[rna_key].first].insert(rna_key);
+          rna_key_count_map[dna_key_map[rna_key].first]++;
+          rna_digital_tag_key_count_map[rna_dig_tag]++;
+          rna_digital_tag_key_div_map[rna_dig_tag].insert(rna_key);
+          rna_good_key_set.insert(rna_key);
+          good_reads_count++;
+        }
+        else
+        {
+          no_dna_key_match++;
+          no_dna_key_match_set.insert(rna_key);
+        }    
+        parsed_reads++;
       }
       else
       {
-	discard_reads++;
+        discard_reads++;
       }
     }
     fastq_file.close();
@@ -215,66 +211,66 @@ int main(int argc, char * argv[])
       for (map<string, pair<int, set<string> > >::iterator it_third = (rna_map[*itsec]).begin(); it_third != (rna_map[*itsec]).end(); it_third++)
       {
         int ic_length = (it_third->first).length();
-	tag_record << (it_third->first) << '\t' << (it->first) << '\t' << (12 - ic_length) << '\t' << (int)((it_third->second).first) << '\t' << (int)((it_third->second).second.size()) << '\t';
-	if ((it_third->first).size() > app_tag_len)
-	{
-	  if (tag_match(it->first, it_third->first))
-	  {
-	    match[0] += (it_third->second).first;
-	    digital_match[0] += (it_third->second).second.size();
-	    all[0] += (it_third->second).first;
-	    digital_all[0] += (it_third->second).second.size();
-	    all_matched_reads += (it_third->second).first;
-	    sum_match += (it_third->second).first;
-	    sum_dig_match += (it_third->second).second.size();
-	    sum_all += (it_third->second).first;
-	    sum_dig_all += (it_third->second).second.size();
-	    all_matched_digital_reads += (it_third->second).second.size();
-	    tag_record << '1' << endl;
-	  }
-	  else
-	  {
-	    mis[0] += (it_third->second).first;
-	    dig_mis[0] += (it_third->second).second.size();
-	    all[0] += (it_third->second).first;
-	    digital_all[0] += (it_third->second).second.size();
-	    sum_mis += (it_third->second).first;
-	    sum_dig_mis += (it_third->second).second.size();
-	    sum_all += (it_third->second).first;
-	    sum_dig_all += (it_third->second).second.size();
-	    tag_record << '0' << endl;
-	  }
-	}
-	else
-	{
-	  int pos = app_tag_len + 1 - (it_third->first).size();
-	  if (tag_match(it->first, it_third->first))
-	  {
-	    match[pos] += (it_third->second).first;
-	    digital_match[pos] += (it_third->second).second.size();
-	    all[pos] += (it_third->second).first;
-	    digital_all[pos] += (it_third->second).second.size();
-	    all_matched_reads += (it_third->second).first;
-	    sum_match += (it_third->second).first;
-	    sum_dig_match += (it_third->second).second.size();
-	    sum_all += (it_third->second).first;
-	    sum_dig_all += (it_third->second).second.size();
-	    all_matched_digital_reads += (it_third->second).second.size();
-	    tag_record << '1' << endl;
-	  }
-	  else
-	  {
-	    mis[pos] += (it_third->second).first;
-	    dig_mis[pos] += (it_third->second).second.size();
-	    all[pos] += (it_third->second).first;
-	    digital_all[pos] += (it_third->second).second.size();
-	    sum_mis += (it_third->second).first;
-	    sum_dig_mis += (it_third->second).second.size();
-	    sum_all += (it_third->second).first;
-	    sum_dig_all += (it_third->second).second.size();
-	    tag_record << '0' << endl;
-	  }	  
-	}
+  tag_record << (it_third->first) << '\t' << (it->first) << '\t' << (12 - ic_length) << '\t' << (int)((it_third->second).first) << '\t' << (int)((it_third->second).second.size()) << '\t';
+  if ((it_third->first).size() > app_tag_len)
+  {
+    if (tag_match(it->first, it_third->first))
+    {
+      match[0] += (it_third->second).first;
+      digital_match[0] += (it_third->second).second.size();
+      all[0] += (it_third->second).first;
+      digital_all[0] += (it_third->second).second.size();
+      all_matched_reads += (it_third->second).first;
+      sum_match += (it_third->second).first;
+      sum_dig_match += (it_third->second).second.size();
+      sum_all += (it_third->second).first;
+      sum_dig_all += (it_third->second).second.size();
+      all_matched_digital_reads += (it_third->second).second.size();
+      tag_record << '1' << endl;
+    }
+    else
+    {
+      mis[0] += (it_third->second).first;
+      dig_mis[0] += (it_third->second).second.size();
+      all[0] += (it_third->second).first;
+      digital_all[0] += (it_third->second).second.size();
+      sum_mis += (it_third->second).first;
+      sum_dig_mis += (it_third->second).second.size();
+      sum_all += (it_third->second).first;
+      sum_dig_all += (it_third->second).second.size();
+      tag_record << '0' << endl;
+    }
+  }
+  else
+  {
+    int pos = app_tag_len + 1 - (it_third->first).size();
+    if (tag_match(it->first, it_third->first))
+    {
+      match[pos] += (it_third->second).first;
+      digital_match[pos] += (it_third->second).second.size();
+      all[pos] += (it_third->second).first;
+      digital_all[pos] += (it_third->second).second.size();
+      all_matched_reads += (it_third->second).first;
+      sum_match += (it_third->second).first;
+      sum_dig_match += (it_third->second).second.size();
+      sum_all += (it_third->second).first;
+      sum_dig_all += (it_third->second).second.size();
+      all_matched_digital_reads += (it_third->second).second.size();
+      tag_record << '1' << endl;
+    }
+    else
+    {
+      mis[pos] += (it_third->second).first;
+      dig_mis[pos] += (it_third->second).second.size();
+      all[pos] += (it_third->second).first;
+      digital_all[pos] += (it_third->second).second.size();
+      sum_mis += (it_third->second).first;
+      sum_dig_mis += (it_third->second).second.size();
+      sum_all += (it_third->second).first;
+      sum_dig_all += (it_third->second).second.size();
+      tag_record << '0' << endl;
+    }    
+  }
       }
     }
     for (int i = 0; i != app_tag_len + 1; i++)

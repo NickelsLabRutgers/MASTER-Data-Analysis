@@ -102,7 +102,7 @@ def genSlippageStats(tss_fn, ptn_fn, fastq_fn_list):
 		else:
 			tss_dict[tss] = 1
 
-	#Creat sequence matching dictionary for testing RNA read substring matching to TSS sequence.
+	#Create sequence matching dictionary for testing RNA read substring matching to TSS sequence.
 	seq_mat_dict = {}
 	for tss in tss_dict:
 		for i in xrange(12):
