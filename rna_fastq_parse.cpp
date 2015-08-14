@@ -74,7 +74,6 @@ int main(int argc, char * argv[])
   string dna_key, dna_tag, rna_key, rna_tag, rna_dig_tag;
   int dna_key_count;
 
-  set<string> raw_rna_digital_tag_set, raw_rna_key_set, raw_rna_tag_set;
   map<string, int> raw_rna_key_map, raw_rna_tag_map, raw_rna_digital_tag_map;
   map<string, pair<string, int> > dna_key_map;
   map<string, map<string, int> > dna_tag_map;
@@ -128,23 +127,27 @@ int main(int argc, char * argv[])
       flag = 0;
       mid_index = bases.find(MID_SEQ.substr(extra_pos, MID_SEQ.length() - extra_pos)) - extra_pos;
 
-      if(mid_index < 0 || mid_index + 21 + key_len > bases.length() || mid_index - digital_tag_len + extra_pos < 1)
+      if(mid_index < 0 || mid_index + MID_SEQ.length() + END_SEQ.length() + key_len > bases.length() || mid_index - digital_tag_len + extra_pos < 1)
       {
         c_fail++; //Size fails.
-        //q_fail++;
         flag = 1;
       }
       else
       {
         rna_key = bases.substr(mid_index + MID_SEQ.length(), key_len);
-        //cout << rna_key << endl;
         rna_dig_tag = bases.substr(0, digital_tag_len);
         rna_tag = bases.substr(digital_tag_len, mid_index - digital_tag_len + extra_pos);
-        raw_rna_tag_set.insert(rna_tag);
-        raw_rna_key_set.insert(rna_key);
-        raw_rna_digital_tag_set.insert(rna_dig_tag);
         recovered_reads++;
-        for(int j = 0; j < (mid_index + key_len + 21); j++)
+        if (END_SEQ.compare(bases.substr(mid_index + key_len + 16, END_SEQ.length())) != 0)
+        {
+          flag = 1;
+          c_fail++;
+        }
+      }
+
+      if (flag != 1)
+      {
+        for(int j = 0; j < (mid_index + key_len + MID_SEQ.length() + END_SEQ.length()); j++)
         {
           if((qual.at(j) < qual_min_char) || bases.at(j) == 'N')
           {
@@ -152,11 +155,6 @@ int main(int argc, char * argv[])
             flag = 1;
             break;
           }
-        }
-
-        if (END_SEQ.compare(bases.substr(mid_index + key_len + 16, END_SEQ.length())) != 0)
-        {
-          flag = 1;
         }
       }
 
@@ -166,7 +164,6 @@ int main(int argc, char * argv[])
         rna_map[rna_key][rna_tag].second.insert(rna_dig_tag);
         if (dna_key_map.find(rna_key) != dna_key_map.end())
         {
-          //cout << rna_key << endl;
           rna_tag_map[dna_key_map[rna_key].first].insert(rna_key);
           rna_key_count_map[dna_key_map[rna_key].first]++;
           rna_digital_tag_key_count_map[rna_dig_tag]++;
@@ -215,26 +212,24 @@ int main(int argc, char * argv[])
   tag_record.close();
 
   run_log << "Total RNA reads: " << total_reads << endl;
-  run_log << "Recovered RNA reads: " << recovered_reads << endl;
-  run_log << "Recovered RNA tag diversity: " << raw_rna_tag_set.size() << endl;
-  run_log << "Recovered RNA digital tag diversity: " << raw_rna_digital_tag_set.size() << endl;
-  run_log << "Recovered RNA key diversity (count same tag with different lengths): " << raw_rna_key_set.size() << endl << endl;;
-  run_log << "Discarded RNA reads: " << discard_reads << endl;
-  run_log << "Discarded RNA reads for quality score failure: " << q_fail << endl;
-  run_log << "Discarded RNA reads for template match failure: " << c_fail << endl << endl;
-  run_log << "Parsed reads (counting all reads passed QC): " << parsed_reads << endl;
+  run_log << "Count of reads with unexpected structure: " << c_fail << endl;
+  run_log << "Count of reads with quality score lower than cutoff: " << q_fail << endl << endl;
+
+  run_log << "For all RNA reads passed quality checks (sequence structure and quality score): " << endl;
+  run_log << "--Count:" << parsed_reads << endl;
   double percent = (double)parsed_reads/total_reads*100;
-  run_log << percent << "% of reads passed quality check\n";
-  run_log << "Diversity of RNA keys passed QC: " << rna_map.size() << endl;
-  run_log << "Diversity of RNA keys passed QC without matching DNA keys: " << no_dna_key_match_set.size() << endl;
-  run_log << "Count of RNA keys passed QC without matching DNA keys: " << no_dna_key_match << endl << endl;
-  run_log << "For all RNA reads passed QC with matching DNA keys: " << endl;
-  run_log << "\t|RNA tag diversity: " << rna_tag_map.size() << endl;
-  run_log << "\t|RNA key diversity: " << rna_good_key_set.size() << endl;
-  run_log << "\t|RNA digital tag diversity: " << rna_digital_tag_key_div_map.size()<<endl;
-  run_log << "\t|RNA reads count: " << good_reads_count << endl;
-  run_log << "\t|RNA tag matched reads count: " << all_matched_reads << endl;
-  run_log << "\t|RNA tag matched reads digital count: " << all_matched_digital_reads << endl << "\t|" << endl;
+  run_log << "--Include " << percent << "% of total reads\n";
+  run_log << "--Barcode diversity: " << rna_map.size() << endl;
+  run_log << "--Diversity of RNA barcode without matching DNA barcode: " << no_dna_key_match_set.size() << endl;
+  run_log << "--Count of RNA reads without matching DNA barcode: " << no_dna_key_match << endl << endl;
+  
+  run_log << "For all RNA reads passed quality checks with matching DNA barcode: " << endl;
+  run_log << "\t|Count: " << good_reads_count << endl;
+  run_log << "\t|TSS-region sequence diversity: " << rna_tag_map.size() << endl;
+  run_log << "\t|Barcode diversity: " << rna_good_key_set.size() << endl;
+  run_log << "\t|Digital tag diversity: " << rna_digital_tag_key_div_map.size()<<endl;
+  run_log << "\t|Count of RNA reads with transcribed TSS-region sequence matched to DNA template: " << all_matched_reads << endl;
+  run_log << "\t|Digital tag count of RNA reads with transcribed TSS-region sequence matched to DNA template: " << all_matched_digital_reads << endl << "\t|" << endl;
 
   vector<int> key_div_per_tag, key_count_per_tag, key_div_per_dig_tag, key_count_per_dig_tag;
   for (map<string, set<string> >::iterator it = rna_tag_map.begin(); it != rna_tag_map.end(); it++)
@@ -292,25 +287,25 @@ int main(int argc, char * argv[])
   }
   key_count_per_tag_std = (key_count_per_tag.size() < 2) ? (0) : ( sqrt(key_count_per_tag_accum/ (key_count_per_tag.size() - 1) ) );
 
-  run_log << "\t|Average key diversity per tag: " << key_div_per_tag_mean << endl;
-  run_log << "\t|Median key diversity per tag: " << ( (key_div_per_tag.size() == 0) ? (0) : (key_div_per_tag[(key_div_per_tag.size()/2)]) ) << endl;
-  run_log << "\t|Range key diversity per tag: " << ( (key_div_per_tag.size() == 0) ? (0) : (key_div_per_tag[key_div_per_tag.size()-1] - key_div_per_tag[0]) ) << endl;
-  run_log << "\t|Standard deviation of key diversity per tag: " << key_div_per_tag_std << endl;
+  run_log << "\t|Average barcode diversity per TSS-region: " << key_div_per_tag_mean << endl;
+  run_log << "\t|Median barcode diversity per TSS-region: " << ( (key_div_per_tag.size() == 0) ? (0) : (key_div_per_tag[(key_div_per_tag.size()/2)]) ) << endl;
+  run_log << "\t|Range barcode diversity per TSS-region: " << ( (key_div_per_tag.size() == 0) ? (0) : (key_div_per_tag[key_div_per_tag.size()-1] - key_div_per_tag[0]) ) << endl;
+  run_log << "\t|Standard deviation of barcode diversity per TSS-region: " << key_div_per_tag_std << endl;
 
-  run_log << "\t|Average key count per tag: " << key_count_per_tag_mean << endl;
-  run_log << "\t|Median key count per tag: " << ( (key_count_per_tag.size() == 0) ? (0) : (key_count_per_tag[(key_count_per_tag.size()/2)]) ) << endl;
-  run_log << "\t|Range key count per tag: " << ( (key_count_per_tag.size() == 0) ? (0) : (key_count_per_tag[key_count_per_tag.size()-1] - key_count_per_tag[0]) ) << endl;
-  run_log << "\t|Standard deviation of key count per tag: " << key_count_per_tag_std << endl << "\t|" << endl;
+  run_log << "\t|Average read count per TSS-region: " << key_count_per_tag_mean << endl;
+  run_log << "\t|Median read count per TSS-region: " << ( (key_count_per_tag.size() == 0) ? (0) : (key_count_per_tag[(key_count_per_tag.size()/2)]) ) << endl;
+  run_log << "\t|Range read count per TSS-region: " << ( (key_count_per_tag.size() == 0) ? (0) : (key_count_per_tag[key_count_per_tag.size()-1] - key_count_per_tag[0]) ) << endl;
+  run_log << "\t|Standard deviation of read count per TSS-region: " << key_count_per_tag_std << endl << "\t|" << endl;
 
-  run_log << "\t|Average key diversity per digital tag: " << key_div_per_dig_tag_mean << endl;
-  run_log << "\t|Median key diversity per digital tag: " << ( (key_div_per_dig_tag.size() == 0) ? (0) : (key_div_per_dig_tag[(key_div_per_dig_tag.size()/2)]) ) << endl;
-  run_log << "\t|Range key diversity per digital tag: " << ( (key_div_per_dig_tag.size() == 0) ? (0) : (key_div_per_dig_tag[key_div_per_dig_tag.size()-1] - key_div_per_dig_tag[0]) ) << endl;
-  run_log << "\t|Standard deviation of key diversity per digital tag: " << key_div_per_dig_tag_std << endl;
+  run_log << "\t|Average barcode diversity per digital tag: " << key_div_per_dig_tag_mean << endl;
+  run_log << "\t|Median barcode diversity per digital tag: " << ( (key_div_per_dig_tag.size() == 0) ? (0) : (key_div_per_dig_tag[(key_div_per_dig_tag.size()/2)]) ) << endl;
+  run_log << "\t|Range barcode diversity per digital tag: " << ( (key_div_per_dig_tag.size() == 0) ? (0) : (key_div_per_dig_tag[key_div_per_dig_tag.size()-1] - key_div_per_dig_tag[0]) ) << endl;
+  run_log << "\t|Standard deviation of barcode diversity per digital tag: " << key_div_per_dig_tag_std << endl;
 
-  run_log << "\t|Average key count per digital tag: " << key_count_per_dig_tag_mean << endl;
-  run_log << "\t|Median key count per digital tag: " << ( (key_count_per_dig_tag.size() == 0) ? (0) : (key_count_per_dig_tag[(key_count_per_dig_tag.size()/2)]) ) << endl;
-  run_log << "\t|Range key count per digital tag: " << ( (key_count_per_dig_tag.size() == 0) ? (0) : (key_count_per_dig_tag[key_count_per_dig_tag.size()-1] - key_count_per_dig_tag[0]) ) << endl;
-  run_log << "\t|Standard deviation of key count per digital tag: " << key_count_per_dig_tag_std << endl;
+  run_log << "\t|Average read count per digital tag: " << key_count_per_dig_tag_mean << endl;
+  run_log << "\t|Median read count per digital tag: " << ( (key_count_per_dig_tag.size() == 0) ? (0) : (key_count_per_dig_tag[(key_count_per_dig_tag.size()/2)]) ) << endl;
+  run_log << "\t|Range read count per digital tag: " << ( (key_count_per_dig_tag.size() == 0) ? (0) : (key_count_per_dig_tag[key_count_per_dig_tag.size()-1] - key_count_per_dig_tag[0]) ) << endl;
+  run_log << "\t|Standard deviation of read count per digital tag: " << key_count_per_dig_tag_std << endl;
 
   run_log.close();
   return 0;
