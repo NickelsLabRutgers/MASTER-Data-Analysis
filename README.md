@@ -11,7 +11,9 @@ The output TSS-regions and barcodes file is tab delimited file with barcode, TSS
 ## 5' RNA-Seq Analysis
 The purpose of analyzing 5' RNA-Seq results is to identify the DNA templates and transcription start position of RNA reads.
 
-C++ program __rna_fastq_parse.cpp__ is used for 5' RNA-Seq Analysis. This program takes 8 parameters and sequencing results in FASTQ format. The 8 parameters from left to right are sequencing quality score cutoff, length of digital tag region, length of randomized TSS-region, extra positions need to be considered after randomized TSS-region, length of barcode region, the name of output file containing the summary of RNA reads transcribed from different DNA templates, the name of output stats file of analyzed 5' RNA-Seq results, and the output TSS-regions and barcodes file freom DNA template library analysis. 
+C++ program __rna_fastq_parse.cpp__ is used for 5' RNA-Seq Analysis. This program takes 8 parameters and sequencing results in FASTQ format. The 8 parameters from left to right are sequencing quality score cutoff, length of digital tag region, length of randomized TSS-region, extra positions need to be considered after randomized TSS-region, length of barcode region, the name of output file containing the summary of RNA reads transcribed from different DNA templates, the name of output stats file of analyzed 5' RNA-Seq results, and the output TSS-regions and barcodes file from DNA template library analysis. Note that output RNA reads summary is an obsolete feature. Equivalent data about RNA reads are output in a simpler format described in the next paragraph.
 
 Importantly, __rna_fastq_parse.cpp__ will also output a __tag record file__ which records all transcribed RNA TSS-region sequences and their DNA templates and counts. This file is tab delimited with transcribed RNA TSS-region sequences, DNA template TSS-regions, start position at _lacCONS_ template, read counts, number of different digital tags in all reads, and match or mismatch to DNA template TSS-regions.
 
+##Contact
+If you have questions about the programs, please contact y.will.zhang@gmail.com.
