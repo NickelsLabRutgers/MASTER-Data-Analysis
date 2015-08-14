@@ -45,7 +45,7 @@ int main(int argc, char * argv[])
 {
   if(argc < 10)
   {
-    cerr << "Usage: " << argv[0] << " [quality score cutoff] [digital tag length] [tag length] [extra position] [key length] <output file for unformated result> <run stats file name> <dna parsed file> <rna FASTQ files>\n";
+    cerr << "Usage: " << argv[0] << " [quality score cutoff] [digital tag length] [tag length] [extra position] [key length] <output tag record file name> <run stats file name> <dna parsed file> <rna FASTQ files>\n";
     return 0;
   }
 
@@ -57,12 +57,9 @@ int main(int argc, char * argv[])
   string rna_file_name = argv[6];
   
   string sample_id = rna_file_name.substr(0,5);
-  ifstream fastq_file, dna_fq_file(argv[8]);
-  ofstream unformated_result(argv[6]), run_log(argv[7]), tag_record;
-  tag_record.open((rna_file_name.substr(0, 7) + "_tag_records.txt").c_str());
+  ifstream fastq_file, dna_parsed_file(argv[8]);
+  ofstream tag_record(argv[6]), run_log(argv[7]);
 
-  unformated_result << "\t\t" << (sample_id + "_match") << '\t' << (sample_id + "_digital_match") << '\t' << (sample_id + "_all") << '\t' << (sample_id + "_digital_all") << '\t' << (sample_id + "_match_percent") << '\t' << (sample_id + "_digital_match_percent") << '\t' << (sample_id + "_all_percent") << '\t' <<(sample_id + "_all_percent") << '\t'<< (sample_id + "_mismatch_percent") << '\t' << (sample_id + "_digital_mismatch_percent") << '\n';
-  
   string file_name;
   string label_hold,bases,pos,qual;
   int flag = 0;
@@ -90,10 +87,10 @@ int main(int argc, char * argv[])
   set<string> no_dna_key_match_set, rna_good_key_set;
 
 
-  while (dna_fq_file)
+  while (dna_parsed_file)
   {
-    dna_fq_file >> dna_key >> dna_tag >> dna_key_count;
-    if (dna_fq_file.eof())
+    dna_parsed_file >> dna_key >> dna_tag >> dna_key_count;
+    if (dna_parsed_file.eof())
     {
       break;
     }
@@ -107,7 +104,7 @@ int main(int argc, char * argv[])
       dna_tag_map[dna_tag]["SUM"] = dna_key_count;
     }
   }
-  dna_fq_file.close();
+  dna_parsed_file.close();
   
   for(int i = 9; i < argc; i++)
   {
@@ -196,97 +193,25 @@ int main(int argc, char * argv[])
   
   for (map<string, set<string> >::iterator it = rna_tag_map.begin(); it != rna_tag_map.end(); it++)
   {
-    int match[total_pos], digital_match[total_pos], all[total_pos], digital_all[total_pos], mis[total_pos], dig_mis[total_pos];
-    //int match[], digital_match[], all[], digital_all[], mis[], dig_mis[];
-    memset( match, 0, total_pos * sizeof(int) );
-    memset( digital_match, 0, total_pos * sizeof(int) );
-    memset( all, 0, total_pos * sizeof(int) );
-    memset( digital_all, 0, total_pos * sizeof(int) );
-    memset( mis, 0, total_pos * sizeof(int) );
-    memset( dig_mis, 0, total_pos * sizeof(int) );
-
-    double sum_match = 0, sum_dig_match = 0, sum_mis = 0, sum_dig_mis = 0, sum_all = 0, sum_dig_all = 0;
     for (set<string>::iterator itsec = (it->second).begin(); itsec != (it->second).end(); itsec++)
     {
       for (map<string, pair<int, set<string> > >::iterator it_third = (rna_map[*itsec]).begin(); it_third != (rna_map[*itsec]).end(); it_third++)
       {
         int ic_length = (it_third->first).length();
-  tag_record << (it_third->first) << '\t' << (it->first) << '\t' << (12 - ic_length) << '\t' << (int)((it_third->second).first) << '\t' << (int)((it_third->second).second.size()) << '\t';
-  if ((it_third->first).size() > app_tag_len)
-  {
-    if (tag_match(it->first, it_third->first))
-    {
-      match[0] += (it_third->second).first;
-      digital_match[0] += (it_third->second).second.size();
-      all[0] += (it_third->second).first;
-      digital_all[0] += (it_third->second).second.size();
-      all_matched_reads += (it_third->second).first;
-      sum_match += (it_third->second).first;
-      sum_dig_match += (it_third->second).second.size();
-      sum_all += (it_third->second).first;
-      sum_dig_all += (it_third->second).second.size();
-      all_matched_digital_reads += (it_third->second).second.size();
-      tag_record << '1' << endl;
-    }
-    else
-    {
-      mis[0] += (it_third->second).first;
-      dig_mis[0] += (it_third->second).second.size();
-      all[0] += (it_third->second).first;
-      digital_all[0] += (it_third->second).second.size();
-      sum_mis += (it_third->second).first;
-      sum_dig_mis += (it_third->second).second.size();
-      sum_all += (it_third->second).first;
-      sum_dig_all += (it_third->second).second.size();
-      tag_record << '0' << endl;
-    }
-  }
-  else
-  {
-    int pos = app_tag_len + 1 - (it_third->first).size();
-    if (tag_match(it->first, it_third->first))
-    {
-      match[pos] += (it_third->second).first;
-      digital_match[pos] += (it_third->second).second.size();
-      all[pos] += (it_third->second).first;
-      digital_all[pos] += (it_third->second).second.size();
-      all_matched_reads += (it_third->second).first;
-      sum_match += (it_third->second).first;
-      sum_dig_match += (it_third->second).second.size();
-      sum_all += (it_third->second).first;
-      sum_dig_all += (it_third->second).second.size();
-      all_matched_digital_reads += (it_third->second).second.size();
-      tag_record << '1' << endl;
-    }
-    else
-    {
-      mis[pos] += (it_third->second).first;
-      dig_mis[pos] += (it_third->second).second.size();
-      all[pos] += (it_third->second).first;
-      digital_all[pos] += (it_third->second).second.size();
-      sum_mis += (it_third->second).first;
-      sum_dig_mis += (it_third->second).second.size();
-      sum_all += (it_third->second).first;
-      sum_dig_all += (it_third->second).second.size();
-      tag_record << '0' << endl;
-    }    
-  }
+        tag_record << (it_third->first) << '\t' << (it->first) << '\t' << (12 - ic_length) << '\t' << (int)((it_third->second).first) << '\t' << (int)((it_third->second).second.size()) << '\t';
+        if (tag_match(it->first, it_third->first))
+        {
+          all_matched_reads += (it_third->second).first;
+          all_matched_digital_reads += (it_third->second).second.size();
+          tag_record << '1' << endl;
+        }
+        else
+        {
+          tag_record << '0' << endl;
+        }
       }
     }
-    for (int i = 0; i != app_tag_len + 1; i++)
-    {
-      unformated_result << it->first << '\t' << dna_tag_map[it->first]["SUM"] << '\t';
-      unformated_result << i << '\t';
-      unformated_result << match[i] << '\t' << digital_match[i] << '\t';
-      unformated_result << all[i] << '\t' << digital_all [i] << '\t';
-      unformated_result << ((sum_match == 0) ? (0):(match[i]*100/sum_match)) << '\t' << ((sum_dig_match == 0) ? (0) : (digital_match[i]*100/sum_dig_match)) << '\t';
-      unformated_result << ((sum_all == 0) ? (0):(all[i]*100/sum_all)) << '\t' << ((sum_dig_all == 0) ? (0) : (digital_all[i]*100/sum_dig_all)) << '\t';
-      unformated_result << ((sum_mis == 0) ? (0) : (mis[i]*100/sum_mis)) << '\t' << ((sum_dig_mis == 0) ? (0) : (dig_mis[i]*100/sum_dig_mis)) << '\n';
-    }
-    unformated_result << it->first << '\t' << dna_tag_map[it->first]["SUM"] << '\t';
-    unformated_result << sum_match << '\t' << sum_dig_match << '\t' << sum_mis << '\t' << sum_dig_mis << '\t' << sum_all << '\t' << sum_dig_all << '\n';
   }
-  unformated_result.close();
   tag_record.close();
 
   run_log << "Total RNA reads: " << total_reads << endl;
