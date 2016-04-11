@@ -139,7 +139,7 @@ int main(int argc, char * argv[])
       
 
       begin_pos = bases.find(BEG_SEQ);
-      if (begin_pos != -1 && begin_pos + 57 + key_len + tag_len <= bases.length() ) 
+      if (begin_pos != -1 && begin_pos + BEG_SEQ.length() + MID_SEQ.length() + END_SEQ.length() + key_len + tag_len <= bases.length() )
       {
         mid_start = begin_pos + BEG_SEQ.length() + tag_len;
         end_start = mid_start + MID_SEQ.length() + key_len;
@@ -166,7 +166,7 @@ int main(int argc, char * argv[])
 
       if (flag != 1) 
       {
-        for (int j = begin_pos; j < begin_pos + 57 + key_len + tag_len; j++)
+        for (int j = begin_pos; j < begin_pos + BEG_SEQ.length() + MID_SEQ.length() + END_SEQ.length() + key_len + tag_len; j++)
         {
           if((qual.at(j) < qual_min_char) || bases.at(j) == 'N')
           {
@@ -176,7 +176,7 @@ int main(int argc, char * argv[])
           }
         }
       }
-      
+
       if(flag != 1)
       {
         raw_key_set.insert(key);

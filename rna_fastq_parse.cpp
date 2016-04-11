@@ -138,7 +138,7 @@ int main(int argc, char * argv[])
         rna_dig_tag = bases.substr(0, digital_tag_len);
         rna_tag = bases.substr(digital_tag_len, mid_index - digital_tag_len + extra_pos);
         recovered_reads++;
-        if (END_SEQ.compare(bases.substr(mid_index + key_len + 16, END_SEQ.length())) != 0)
+        if (END_SEQ.compare(bases.substr(mid_index + key_len + MID_SEQ.length(), END_SEQ.length())) != 0)
         {
           flag = 1;
           c_fail++;
