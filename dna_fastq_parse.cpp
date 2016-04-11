@@ -50,35 +50,34 @@ bool par_map_max_comp_func(pair<string, int> i, pair<string, int> j)
 const string BEG_SEQ="AGGCTTGACACTTTATGCTTCGGCTCGTATAATGTG"; //36
 const string MID_SEQ="GTGAGCGGATAACAAT"; //16
 const string END_SEQ="TGGAA"; //5
-const string QUAL_SCORE = " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
 int main(int argc, char * argv[])
 {
   if(argc < 8)
   {
     /*-----------Arguments-------------------
-     argv[1]: Sequencing quality score for cutoff. Integer.
+     argv[1]: Sequencing quality score for cutoff. Integer. Phred 33 encoding. Discard read when < cutoff. 
      argv[2]: tag(random TSS region) length.
      argv[3]: extra position number considered downstream tag region.
      argv[4]: key length.
      argv[5]: File name for output DNA template file.
      argv[6]: File name for output stats file.
      argv[7]: Input DNA sequencing library raw data files.
-     */
+     ---------------------------------------*/
     cerr << "Usage: " << argv[0] << " [quality score cutoff] [tag length] [extra position] [key length] <output DNA parsed file name> <output DNA stats file name> <FASTQ files>\n";
     return 0;
   }
 
   const int qual_min = atoi(argv[1]), tag_len = atoi(argv[2]), extra_pos = atoi(argv[3]), key_len = atoi(argv[4]);
   char qual_min_char;
-  if ( qual_min <= -1 || qual_min >= 95 )
+  if ( qual_min <= -1 || qual_min >= 93 )
   {
     cerr << "Error converting qual score.\n";
     return 0;
   }
   else
   {
-    qual_min_char = QUAL_SCORE[qual_min];
+    qual_min_char = qual_min + 33;
   }
   
   string parsed_out = argv[5];

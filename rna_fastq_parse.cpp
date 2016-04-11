@@ -15,7 +15,6 @@ using namespace std;
 
 const string MID_SEQ="GTGAGCGGATAACAAT";
 const string END_SEQ="TGGAA";
-const string QUAL_SCORE = " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
 bool tag_match(const string& dna_tag, const string& rna_tag) 
 {
@@ -53,7 +52,18 @@ int main(int argc, char * argv[])
   const int digital_tag_len = atoi(argv[2]), tag_len = atoi(argv[3]), extra_pos = atoi(argv[4]), key_len = atoi(argv[5]);
   const int app_tag_len = tag_len + extra_pos;
   const int total_pos = tag_len + extra_pos + 1;
-  char qual_min_char = QUAL_SCORE[qual_min];
+
+  char qual_min_char;
+  if ( qual_min <= -1 || qual_min >= 93 )
+  {
+    cerr << "Error converting qual score.\n";
+    return 0;
+  }
+  else
+  {
+    qual_min_char = qual_min + 33;
+  }
+  
   string rna_file_name = argv[6];
   
   string sample_id = rna_file_name.substr(0,5);
@@ -195,7 +205,7 @@ int main(int argc, char * argv[])
       for (map<string, pair<int, set<string> > >::iterator it_third = (rna_map[*itsec]).begin(); it_third != (rna_map[*itsec]).end(); it_third++)
       {
         int ic_length = (it_third->first).length();
-        tag_record << (it_third->first) << '\t' << (it->first) << '\t' << (12 - ic_length) << '\t' << (int)((it_third->second).first) << '\t' << (int)((it_third->second).second.size()) << '\t';
+        tag_record << (it_third->first) << '\t' << (it->first) << '\t' << (tag_len + extra_pos - ic_length + 1) << '\t' << (int)((it_third->second).first) << '\t' << (int)((it_third->second).second.size()) << '\t';
         if (tag_match(it->first, it_third->first))
         {
           all_matched_reads += (it_third->second).first;
