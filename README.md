@@ -1,5 +1,5 @@
 # MASTER Data Analysis Tools
-**NOTE**: These tools are deprecated. Pleas use [MASTER-EX-CLT](https://github.com/Nickels-Lab-Rutgers/MASTER-EX-CLT) for MASTER data analysis. 
+**NOTE**: These tools are deprecated. Pleas use [MASTER-EX-CLT](https://github.com/NickelsLabRutgers/MASTER-EX-CLT) for MASTER data analysis. 
 
 This is the data analysis prototype software for MAssively Systematic Transcript End Readout (MASTER) technique. This software analyzes the next generation sequencing results of DNA template library and 5' RNA-Seq in order to obtain the number of RNA reads start at each position of DNA template.
 
