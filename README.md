@@ -1,4 +1,6 @@
-# MASTER Data Analysis Prototype
+# MASTER Data Analysis Tools
+**NOTE**: These tools are deprecated. Pleas use [MASTER-EX-CLT](https://github.com/Nickels-Lab-Rutgers/MASTER-EX-CLT) for MASTER data analysis. 
+
 This is the data analysis prototype software for MAssively Systematic Transcript End Readout (MASTER) technique. This software analyzes the next generation sequencing results of DNA template library and 5' RNA-Seq in order to obtain the number of RNA reads start at each position of DNA template.
 
 ## DNA Template Analysis
@@ -14,6 +16,3 @@ The purpose of analyzing 5' RNA-Seq results is to identify the DNA templates and
 C++ program __rna_fastq_parse.cpp__ is used for 5' RNA-Seq Analysis. This program takes 8 parameters and sequencing results in FASTQ format. The 8 parameters from left to right are sequencing quality score cutoff, length of digital tag region, length of randomized TSS-region, extra positions need to be considered after randomized TSS-region, length of barcode region, the name of output __tag record file__, the name of output stats file of analyzed 5' RNA-Seq results, and the TSS-regions and barcodes file from DNA template library analysis. 
 
 Importantly, __rna_fastq_parse.cpp__ will output a __tag record file__ which records all transcribed RNA TSS-region sequences and their DNA templates and counts. This file is tab delimited with transcribed RNA TSS-region sequences, DNA template TSS-regions, start position at _lacCONS_ template, read counts, number of different digital tags in all reads, and match or mismatch to DNA template TSS-regions.
-
-##Contact
-If you have questions about the programs, please contact y.will.zhang@gmail.com.
